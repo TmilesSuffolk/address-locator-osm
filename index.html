@@ -14,11 +14,78 @@
         width: 100%;
         height: 100%;
         overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       }
       #map {
         width: 100%;
         height: 100vh;
       }
+
+      #top-bar {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        right: 8px;
+        z-index: 1000;
+        display: flex;
+        gap: 6px;
+      }
+
+      #search-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+      }
+
+      #search {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      }
+
+      #suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-top: none;
+        border-radius: 0 0 4px 4px;
+        max-height: 220px;
+        overflow-y: auto;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        display: none;
+      }
+
+      #suggestions div {
+        padding: 8px 10px;
+        font-size: 13px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+      }
+
+      #suggestions div:last-child {
+        border-bottom: none;
+      }
+
+      #suggestions div:hover {
+        background: #f0f4ff;
+      }
+
+      #basemap {
+        padding: 8px 6px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 13px;
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      }
+
       #status {
         position: absolute;
         bottom: 8px;
@@ -27,14 +94,30 @@
         background: rgba(255,255,255,0.9);
         padding: 4px 8px;
         border-radius: 4px;
-        font: 12px sans-serif;
+        font-size: 12px;
         max-width: 80%;
       }
     </style>
   </head>
   <body>
     <div id='map'></div>
-    <div id='status'>Click the map to drop a pin</div>
+
+    <div id='top-bar'>
+      <div id='search-wrap'>
+        <input id='search' type='text' placeholder='Search for an address…' autocomplete='off'>
+        <div id='suggestions'></div>
+      </div>
+      <select id='basemap'>
+        <option value='osm'>Standard</option>
+        <option value='humanitarian'>Humanitarian</option>
+        <option value='positron'>Light (Positron)</option>
+        <option value='dark'>Dark</option>
+        <option value='satellite'>Satellite</option>
+      </select>
+    </div>
+
+    <div id='status'>Click the map or search to drop a pin</div>
+
     <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>
     <script src='script.js'></script>
   </body>
