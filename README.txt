@@ -36,6 +36,15 @@ JotForm setup:
    Parse that string wherever you consume the submission data
    (email notification, integration, API pull, etc.).
 
+Address search & basemaps:
+---------------------------
+- Search box (top left) does forward geocoding via Nominatim's /search
+  endpoint as you type (debounced, 3+ characters). Click a suggestion or
+  press Enter to jump to and pin the top result.
+- Basemap dropdown (top right) switches between OpenStreetMap Standard,
+  Humanitarian, CartoDB Positron (light), CartoDB Dark, and Esri Satellite
+  imagery. Switching basemaps does not clear the selected pin.
+
 Notes / things worth knowing:
 ------------------------------
 - Nominatim's usage policy asks for reasonable request volume and a valid
