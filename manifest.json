@@ -1,4 +1,3 @@
-
 {
   "name": "OSM Geocode Pin Drop (Netlify)",
   "description": "Map widget returning lat/lng + address with stable Netlify hosting.",
