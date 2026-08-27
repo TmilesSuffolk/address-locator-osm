@@ -22,7 +22,9 @@ var basemaps = {
   })
 };
 
-var map = L.map('map', { layers: [basemaps.osm] }).setView([37.0, -76.5], 8);
+var map = L.map('map', { layers: [basemaps.osm], zoomControl: false }).setView([37.0, -76.5], 8);
+// Zoom control moved to bottom-left so it doesn't sit under the search bar / basemap picker up top.
+L.control.zoom({ position: 'bottomleft' }).addTo(map);
 var currentBasemapKey = 'osm';
 
 var selectedCoords = null;
