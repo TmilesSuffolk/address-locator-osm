@@ -1,20 +1,8 @@
-// --- Basemaps ---
+// --- Basemaps (limited to Standard + Satellite) ---
 var basemaps = {
   osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap contributors'
-  }),
-  humanitarian: L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap contributors, Tiles style by HOT'
-  }),
-  positron: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap contributors © CARTO'
-  }),
-  dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap contributors © CARTO'
   }),
   satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     maxZoom: 19,
@@ -22,7 +10,25 @@ var basemaps = {
   })
 };
 
-var map = L.map('map', { layers: [basemaps.osm], zoomControl: false }).setView([37.0, -76.5], 8);
+// --- City of Suffolk, VA bounding box ---
+// Generous rectangle around Suffolk's independent-city limits (it's a large,
+// irregularly shaped city — this box comfortably contains it with a small
+// margin, but is not an exact parcel boundary).
+var SUFFOLK_BOUNDS = L.latLngBounds(
+  [36.53, -76.80], // southwest
+  [36.93, -76.28]  // northeast
+);
+var SUFFOLK_VIEWBOX = SUFFOLK_BOUNDS.getWest() + ',' + SUFFOLK_BOUNDS.getNorth() + ',' +
+  SUFFOLK_BOUNDS.getEast() + ',' + SUFFOLK_BOUNDS.getSouth();
+
+var map = L.map('map', {
+  layers: [basemaps.osm],
+  zoomControl: false,
+  maxBounds: SUFFOLK_BOUNDS.pad(0.05), // small pad so the edge doesn't feel like a hard wall
+  maxBoundsViscosity: 1.0,             // fully resists dragging past the bounds
+  minZoom: 10                          // stop users from zooming out past the city
+}).fitBounds(SUFFOLK_BOUNDS);
+
 // Zoom control moved to bottom-left so it doesn't sit under the search bar / basemap picker up top.
 L.control.zoom({ position: 'bottomleft' }).addTo(map);
 var currentBasemapKey = 'osm';
@@ -83,8 +89,12 @@ function reverseGeocode(lat, lng, callback) {
     .catch(function () { callback(null); });
 }
 
-// --- Click-to-drop-pin ---
+// --- Click-to-drop-pin (restricted to the Suffolk, VA bounding box) ---
 map.on('click', function (e) {
+  if (!SUFFOLK_BOUNDS.contains(e.latlng)) {
+    statusEl.textContent = 'Please choose a point within the City of Suffolk, VA';
+    return;
+  }
   setPin(e.latlng.lat, e.latlng.lng, null);
   statusEl.textContent = 'Looking up address…';
   reverseGeocode(e.latlng.lat, e.latlng.lng, function (result) {
@@ -94,7 +104,7 @@ map.on('click', function (e) {
   });
 });
 
-// --- Address search (Nominatim forward geocoding) ---
+// --- Address search (Nominatim forward geocoding, biased + limited to Suffolk, VA) ---
 var searchDebounce = null;
 
 function clearSuggestions() {
@@ -104,11 +114,16 @@ function clearSuggestions() {
 
 function renderSuggestions(results) {
   suggestionsEl.innerHTML = '';
-  if (!results || !results.length) {
+  // Belt-and-suspenders: even with a bounded Nominatim query, drop any
+  // result that falls outside the Suffolk box before showing it.
+  var filtered = (results || []).filter(function (r) {
+    return SUFFOLK_BOUNDS.contains(L.latLng(parseFloat(r.lat), parseFloat(r.lon)));
+  });
+  if (!filtered.length) {
     clearSuggestions();
     return;
   }
-  results.forEach(function (r) {
+  filtered.forEach(function (r) {
     var item = document.createElement('div');
     item.textContent = r.display_name;
     item.addEventListener('click', function () {
@@ -124,7 +139,9 @@ function renderSuggestions(results) {
 }
 
 function searchAddress(query) {
-  var url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q=' + encodeURIComponent(query);
+  var url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8' +
+    '&countrycodes=us&viewbox=' + SUFFOLK_VIEWBOX + '&bounded=1' +
+    '&q=' + encodeURIComponent(query);
   fetch(url, { headers: { 'Accept': 'application/json' } })
     .then(function (resp) { return resp.json(); })
     .then(renderSuggestions)
