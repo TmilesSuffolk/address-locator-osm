@@ -39,11 +39,24 @@ JotForm setup:
 Address search & basemaps:
 ---------------------------
 - Search box (top left) does forward geocoding via Nominatim's /search
-  endpoint as you type (debounced, 3+ characters). Click a suggestion or
-  press Enter to jump to and pin the top result.
-- Basemap dropdown (top right) switches between OpenStreetMap Standard,
-  Humanitarian, CartoDB Positron (light), CartoDB Dark, and Esri Satellite
-  imagery. Switching basemaps does not clear the selected pin.
+  endpoint as you type (debounced, 3+ characters), restricted to the City
+  of Suffolk, VA bounding box. Click a suggestion or press Enter to jump
+  to and pin the top result.
+- Basemap dropdown (top right) switches between OpenStreetMap Standard and
+  Esri Satellite imagery. Switching basemaps does not clear the selected pin.
+
+Geographic restriction (City of Suffolk, VA):
+-----------------------------------------------
+- The map is limited to a bounding box around Suffolk, VA — you can't pan,
+  click, or search outside it. Clicking outside the box shows a message
+  instead of dropping a pin; search results outside the box are filtered out.
+- This uses a rectangular bounding box (in script.js as SUFFOLK_BOUNDS), not
+  the exact city-limit polygon, so a few points just outside the true city
+  line but inside the rectangle could technically be selectable, and Suffolk
+  is a large, irregularly shaped independent city so the margins aren't tight.
+  If you need hard enforcement against the real boundary, that would require
+  a point-in-polygon check against an actual Suffolk city-limits GeoJSON file
+  rather than a simple bounding box.
 
 Notes / things worth knowing:
 ------------------------------
