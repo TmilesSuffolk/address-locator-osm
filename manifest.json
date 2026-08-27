@@ -1,7 +1,7 @@
 {
   "name": "OSM Geocode Pin Drop (Netlify)",
   "description": "Map widget returning lat/lng + address.",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "author": "Trevor Miles",
   "files": {
     "main": "index.html",
